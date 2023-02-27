@@ -6,12 +6,19 @@ console.log("Started the Script>>>>>>>>>>>>>>>>>>")
 // old prod string url
 const uri = 'mongodb://diUser:6A200sj9ZlHjuXZHtIo2@sc-prod-new-di-database.cluster-ckpzwf1jxpvt.eu-west-1.docdb.amazonaws.com:27017/digital-identity?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false'
 var oldDB = mongoose.createConnection(uri, { tlsCAFile: `rds-combined-ca-bundle.pem` });
+// var oldDB = mongoose.createConnection();
+// connect to database
+// await oldDB.openUri(uri, { tlsCAFile: `rds-combined-ca-bundle.pem` });
 
 oldDB.on('error', console.error.bind(console, 'connection error:'));
 
 
 // new prod string url
-var qaDB = mongoose.createConnection('mongodb://sc-production-solution-cosmosdb:Ez36mJ2V6phUbj9kgSyJPQ0ycQuSbLx0wmVUMQZNqRVNbUlywQHPP01qEKEdNQddWHsxPXxiDirpACDbBFp3YA==@sc-production-solution-cosmosdb.mongo.cosmos.azure.com:10255/smartcosmos?ssl=true&replicaSet=globaldb&retrywrites=false');
+// var qaDB = mongoose.createConnection('mongodb://sc-production-solution-cosmosdb:Ez36mJ2V6phUbj9kgSyJPQ0ycQuSbLx0wmVUMQZNqRVNbUlywQHPP01qEKEdNQddWHsxPXxiDirpACDbBFp3YA==@sc-production-solution-cosmosdb.mongo.cosmos.azure.com:10255/smartcosmos?ssl=true&replicaSet=globaldb&retrywrites=false');
+
+var qaDB = mongoose.createConnection();
+// connect to database
+await qaDB.openUri('mongodb://sc-production-solution-cosmosdb:Ez36mJ2V6phUbj9kgSyJPQ0ycQuSbLx0wmVUMQZNqRVNbUlywQHPP01qEKEdNQddWHsxPXxiDirpACDbBFp3YA==@sc-production-solution-cosmosdb.mongo.cosmos.azure.com:10255/smartcosmos?ssl=true&replicaSet=globaldb&retrywrites=false');
 qaDB.on('error', console.error.bind(console, 'connection error:'));
 
 
@@ -19,7 +26,9 @@ qaDB.on('error', console.error.bind(console, 'connection error:'));
 oldDB.once('open', async function () {
     console.log("Connection Successful!");
     // manufacture data object
-    let distinctBatchId = await qaDB.collection("uninsertBatch").find({ "tagsLength": { $gt: 0 } }).toArray()
+    let distinctBatchIdRow = await qaDB.collection("uninsertBatch").find({ tagsLength: { $gt: 0 } })
+    let distinctBatchId = await distinctBatchIdRow.toArray()
+
 
     console.log("DistinctBatchId======================>", distinctBatchId)
     let chunkSize = 5000
